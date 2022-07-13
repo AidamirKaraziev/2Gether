@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "network"
+version = "0.1.0"
+description = ""
+authors = ["aydkara <aydamir.job@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+SQLAlchemy = "^1.4.37"
+pydantic = "^1.9.1"
+MyApplication = "^0.1.0"
+celery = "^5.2.7"
+fastapi = "^0.78.0"
+base = "^1.0.4"
+entrance = "^1.1.17"
+python-jose="^3.3.0"
+passlib="^1.7.4"
+user-agents="^2.2.0"
+
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
