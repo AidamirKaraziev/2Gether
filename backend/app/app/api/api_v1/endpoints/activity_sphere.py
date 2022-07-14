@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api import deps
 from app.core.response import ListOfEntityResponse, Meta
-from app.crud.activity_sphere import crud_activity_sphere
+from app.crud.crud_activity_sphere import crud_activity_sphere
 from app.getters.activity_sphere import get_activity_sphere
 
 router = APIRouter()

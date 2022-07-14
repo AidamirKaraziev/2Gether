@@ -92,7 +92,6 @@ def create_upload_file(
         file: Optional[UploadFile] = File(None),
         current_user=Depends(deps.get_current_user_by_bearer),
         session=Depends(deps.get_db),
-        # token: str = Header(...),
         ):
     if num not in ["main", "1", "2"]:
         raise UnfoundEntity(

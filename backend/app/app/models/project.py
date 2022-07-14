@@ -15,6 +15,7 @@ class Project(Base):
     name = Column(String)
 
     location_id = Column(Integer, ForeignKey("locations.id", ondelete="SET NULL"))  # City
+
     stages_of_implementation_id = Column(Integer, ForeignKey("stage_of_implementation.id", ondelete="SET NULL"))
     budget = Column(Integer)
     partners_share = Column(Integer)  # от 1 до 100 ДОЛЯ ПАРТНЕРА
@@ -37,6 +38,7 @@ class Project(Base):
                                                back_populates='project', cascade="all, delete")
     partner_competencies_of_project = relationship('PartnerCompetenceOfProject',
                                                    back_populates='project', cascade="all, delete")
+
 
 # Вопрос:
 # Надо убрать повторения в базе данных(уникальное значение по двум столбцам)

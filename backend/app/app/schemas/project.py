@@ -32,11 +32,11 @@ class ProjectCreate(BaseModel):  # это будет запрашиваемая 
     # user_id будет прилетать в токене
     name: Optional[str] = Field(None, title="Название")
     location: Optional[int] = Field(None, title="id города")
-    activity_spheres: Optional[List] = Field(None, title="Список id сфер деятельности")
+    activity_spheres: Optional[List[int]] = Field(None, title="Список id сфер деятельности")
     stages_of_implementation: Optional[int] = Field(None, title="id стадии реализации")
     budget: Optional[int] = Field(None, title="Бюджет")
     partners_share: Optional[int] = Field(None, title="Доля партнера")
-    partner_competences: Optional[List] = Field(None, title="Компетенции партнера список id")
+    partner_competences: Optional[List[int]] = Field(None, title="Компетенции партнера список id")
     about_the_project: Optional[str] = Field(None, title="О проекте")
     site: Optional[str] = Field(None, title="Сайт")
     photo_main: Optional[str] = Field(None, title="Главная фотка")
@@ -74,6 +74,4 @@ class ProjectGet(BaseModel):
 
 
 class ProjectPhoto(BaseModel):
-    photo_main: Optional[str]
-    photo_1: Optional[str]
-    photo_2: Optional[str]
+    photo: Optional[str]

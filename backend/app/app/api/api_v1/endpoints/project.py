@@ -11,7 +11,7 @@ from app.core.response import SingleEntityResponse
 from app.crud.crud_project import crud_project
 from app.exceptions import UnfoundEntity
 from app.schemas.project import ProjectCreate, ProjectBase, ProjectPhoto
-
+from app.getters.project import get_project_photo
 router = APIRouter()
 
 
@@ -24,41 +24,39 @@ router = APIRouter()
 def update_user(
 
         new_data: ProjectCreate,
+        current_user=Depends(deps.get_current_user_by_bearer),
         session=Depends(deps.get_db),
+
 ):
-    pass
+    crud_project.create_for_user(db=session, obj_in=new_data, user_field_value=current_user)
+    # partner_competence = crud_partner_competence_of_project.create()
+    # activity_sphere =
+    return SingleEntityResponse(data=get_project(current_user, request=request))
 
 
+# Добавление фото проекта, загрузка их на сервер, возвращение ссылок на фото
 @router.put("/project/photo/{num}",
             response_model=SingleEntityResponse[ProjectPhoto],
-            name='Изменить фотографию',
-            description='Изменить фотографию в проекте, если отправить пустой файл сбрасывает фото в проекте',
+            name='Добавляет фотографию',
+            description='Добавляет фотографию в проекте',
             tags=['Данные проекта'],
             )
 def create_upload_file(
         request: Request,
-        num: str = Path(...),
         file: Optional[UploadFile] = File(None),
         # current_user=Depends(deps.get_current_user_by_bearer),
-        session=Depends(deps.get_db),
+        # session=Depends(deps.get_db),
         ):
-    if num not in ["main", "1", "2"]:
-        raise UnfoundEntity(
-            message="Неправильный num",
-            num=2,
-            description="Введите правильный num",
-            path="$.body",
-        )
 
-    # user_id = current_user.id
-    save_path = crud_project.adding_photo(num=num, file=file)
+    save_path = crud_project.adding_photo(file=file)
     if not save_path:
         raise UnfoundEntity(message="Не отправлен загружаемый файл",
                             num=2,
                             description="Попробуйте загрузить файл еще раз",
                             path="$.body",
                             )
-    return SingleEntityResponse(data=save_path)
+    response = get_project_photo(path_name=save_path, request=request, )
+    return SingleEntityResponse(data=response)
 
 
 @router.get("/static/{filename:path}", name='Получить статический файл', tags=['Инструменты'])

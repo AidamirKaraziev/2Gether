@@ -1,7 +1,7 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Tuple
 
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.db.base_class import Base
@@ -44,6 +44,20 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)  # type: ignore
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def create_for_user(
+            self,
+            db: Session,
+            obj_in: CreateSchemaType,
+            user_field_value: Any,
+            user_field_name: str = "user"
+    ) -> ModelType:
+        obj_in_data = jsonable_encoder(obj_in)
+        db_obj = self.model({**obj_in_data, user_field_name: user_field_value})  # type: ignore
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

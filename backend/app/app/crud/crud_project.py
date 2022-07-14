@@ -74,21 +74,28 @@ class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
         if len(not_found_competences) > 0:
             return None, -5, not_found_competences
 
-    # Должно сохранять фото год, месяц, день, ["main", 1, 2]
-    def adding_photo(self, num, file: Optional[UploadFile]):
+        # Создание тут проекта если предыдущие этапы пройдены
+        self.create(db=db, obj_in=project)
+
+        # создание тут связей таблиц компетенций и сфер деятельности
+        # Смотри crud_story
+
+    # Должно сохранять фото год, месяц, день,
+    def adding_photo(self, file: Optional[UploadFile]):
         now = datetime.datetime.utcnow()
         year = now.strftime("%Y")
         month = now.strftime("%m")
         day = now.strftime("%d")
-        path_date = f"{year}/{month}/{day}/"
-        path_name = DATA_FOLDER_PROJECT + path_date + f"{num}/"
-        # if file is None:
-            # path_name = DATA_FOLDER + f"{id_user}/{num}"
-            # if os.path.exists(path_name):
-            #     shutil.rmtree(path_name)
-            # return {"photo": None}
+        path_date = f"{year}/{month}/{day}"
+        path_name = DATA_FOLDER_PROJECT + path_date + "/"
+
+        if file is None:
+            return None
 
         filename = uuid.uuid4().hex + os.path.splitext(file.filename)[1]
+        element = ["Photo_project", path_date, filename]
+
+        path_for_url = "/".join(element)
 
         if not os.path.exists(path_name):
             os.makedirs(path_name)
@@ -97,7 +104,7 @@ class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
             shutil.copyfileobj(file.file, wf)
             file.file.close()  # удаляет временный
 
-        return {"photo": path_name}
+        return path_for_url
 
 
 crud_project = CrudProject(Project)
