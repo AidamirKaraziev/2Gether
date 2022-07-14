@@ -16,8 +16,6 @@ from app.exceptions import UnprocessableEntity
 
 from app.api import deps
 
-# from app.getters.user import get_user
-
 
 router = APIRouter()
 

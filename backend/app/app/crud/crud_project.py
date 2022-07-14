@@ -11,38 +11,29 @@ from app.crud.base import CRUDBase
 from app.models import Project, User, Location, ActivitySphere, StageOfImplementation, PartnerCompetence
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectGet
 
+from app.getters.project import get_project_for_db
+
+from app.schemas.partner_competence_of_project import PartnerCompetenceOfProjectCreate
+
+from app.crud.partner_competence_of_project import crud_partner_competence_of_project
+
+from app.crud.crud_activity_sphere_of_project import crud_activity_sphere_of_project
+from app.schemas.activity_sphere_of_project import ActivitySphereOfProjectCreate
+
+from app.models import ActivitySpheresOfProject, PartnerCompetenceOfProject
 
 DATA_FOLDER_PROJECT = "./static/Photo_project/"
 
 
 class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
-    def _check_location(self, db: Session, *, location_id: int):
-        return "что-то"
-
-    def _check_activity_sphere(self, db: Session, *, activity_sphere_id_list: List):
-        return "что-то"
-
-    def _check_stages_of_implementation(self, db: Session, *, stages_of_implementation_id: int):
-        pass
-
-    def _check_partner_competence(self, db: Session, *, partner_competence_id_list: List):
-        pass
-
-    def create_project(self, db: Session, *, project: ProjectCreate):  # -> ProjectGet
-        # Проверить
-        # юзера
-        # города
-        # сферы деятельности
-        # стадии проекта
-        # партнерские компетенции
-        # найти и добавить в таблицу уже загруженные фотографии(???)
+    def create_project(self, db: Session, *, project: ProjectCreate, user_id: int):  # -> ProjectGet
 
         # Check Id user
-        if not (db.query(User).filter(User.id == project.user_id).first()):
+        if not (db.query(User).filter(User.id == user_id).first()):
             return None, -1, None
 
-        # Check location_id
-        if not (db.query(Location).filter(Location.id == project.location).first()):
+        # Check location
+        if not (db.query(Location).filter(Location.id == project.location_id).first()):
             return None, -2, None
 
         # Check id activity_sphere
@@ -59,7 +50,7 @@ class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
 
         # Check id StageOfImplementation
         if not (db.query(StageOfImplementation).
-                filter(StageOfImplementation.id == project.stages_of_implementation).first()):
+                filter(StageOfImplementation.id == project.stages_of_implementation_id).first()):
             return None, -4, None
 
         # Check id PartnerCompetence
@@ -75,10 +66,29 @@ class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
             return None, -5, not_found_competences
 
         # Создание тут проекта если предыдущие этапы пройдены
-        self.create(db=db, obj_in=project)
-
+        db_project = get_project_for_db(user_id=user_id, project=project)
+        db_obj = super().create(db=db, obj_in=db_project)
+        db_obj = db.query(Project).filter(Project.user_id == user_id, Project.name == db_obj.name).first()
+        project_id = db_obj.id
         # создание тут связей таблиц компетенций и сфер деятельности
+        if partner_competences is not None:
+            for partner_competence in partner_competences:
+                competence_project = PartnerCompetenceOfProjectCreate(project_id=project_id,
+                                                                      partner_competencies_id=partner_competence.id)
+                crud_partner_competence_of_project.create(db=db, obj_in=competence_project)
+        if activity_spheres is not None:
+            for activity_sphere in activity_spheres:
+                activity_sphere_project = ActivitySphereOfProjectCreate(project_id=project_id,
+                                                                        activity_of_sphere_id=activity_sphere.id)
+                crud_activity_sphere_of_project.create(db=db, obj_in=activity_sphere_project)
         # Смотри crud_story
+        # return "123123"
+        db_activity_project = db.query(ActivitySpheresOfProject).\
+            filter(ActivitySpheresOfProject.project_id == project_id).all()
+        db_competence_project = db.query(PartnerCompetenceOfProject).\
+            filter(PartnerCompetenceOfProject.project_id == project_id).all()
+
+        return db_obj, db_competence_project, db_activity_project
 
     # Должно сохранять фото год, месяц, день,
     def adding_photo(self, file: Optional[UploadFile]):

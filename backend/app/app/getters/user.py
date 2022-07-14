@@ -10,7 +10,6 @@ from app.models import User
 from app.getters.location import get_location
 
 
-
 def get_user(user: User, request: Optional[Request], config: Settings = settings) -> UserBase:
     if request is not None:
         url = request.url.hostname + config.API_V1_STR + "/static/"

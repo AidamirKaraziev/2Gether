@@ -192,8 +192,3 @@ def check_code(
 
 if __name__ == "__main":
     logging.info('Running...')
-
-
-# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjU3ODY2NjU0LCJpYXQiOjE2NTcxNzU0NTQsIm5iZiI6MTY1NzE3NTQ1NCwianRpIjoiYTUyMjU0OGItOTEyOS00ZDE4LWI1ZTEtMzExNzgyMTczODM3In0.yfrV_oiwHmn5Vgxnzh8jcFuu6gWvp0Wwd9nONatrvTU
-
-# ТОКЕН ВТОРОГО ЮЗЕРА
