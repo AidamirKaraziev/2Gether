@@ -69,13 +69,14 @@ def update_user(
         session=Depends(deps.get_db),
 ):
     # ВОТ ЗДЕСЬ ПРОВЕРЯТЬ ЕСТЬ ЛИ ТАКОЙ ID ЛОКАЦИИ
-    loc = crud_location.get(db=session, id=new_data.location_id)
-    if loc is None:
-        raise UnfoundEntity(message="Неправильно указан город",
-                            num=0,
-                            description="Попробуйте указать город еще раз!",
-                            path="$.body",
-                            )
+    if new_data.location_id in new_data:
+        loc = crud_location.get(db=session, id=new_data.location_id)
+        if loc is None:
+            raise UnfoundEntity(message="Неправильно указан город",
+                                num=0,
+                                description="Попробуйте указать город еще раз!",
+                                path="$.body",
+                                )
     crud_user.update(db=session, db_obj=current_user, obj_in=new_data)
     return SingleEntityResponse(data=get_user(current_user, request=request))
 

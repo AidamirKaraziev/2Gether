@@ -34,52 +34,50 @@ def create_project(
 ):
     # Что-то правильное, пример Володи
     # crud_project.create_for_user(db=session, obj_in=new_data, user_field_value=current_user)
-    # написать код который проверяет есть ли такой объект в базе данных
-    obj = crud_project.get_by_name(db=session, name=new_data.name)
-    if obj is not None:
+
+    project, code, indexes = crud_project.create_project(db=session, project=new_data, user_id=current_user.id)
+
+    if code == -1:
         raise UnprocessableEntity(
             message="Проект с таким именем уже есть",
-            num=1,
+            num=2,
             description="поменяйте имя проекта",
             path="$.body"
         )
-    project, code, indexes = crud_project.create_project(db=session, project=new_data, user_id=current_user.id)
-    # project = get_project(project=project)
-
     # обработка исключений того что вернул
-    if code == -1:
+    if code == -2:
         raise UnprocessableEntity(
             message="Нет такого пользователя",
-            num=2,
+            num=3,
             description="Попробуйте зайти заново",
             path="$.body",
         )
-    if code == -2:
+    if code == -3:
         raise UnprocessableEntity(
             message="Нет такого города!",
-            num=3,
+            num=4,
             description="Попробуйте выбрать город еще раз!",
             path="$.body"
         )
-    if code == -3:
+    if code == -4:
         raise UnprocessableEntity(
             message="Нет такой сферы деятельности",
-            num=4,
+            num=5,
             description="Попробуйте выбрать сферу деятельности заново!",
             path="$.body"
         )
 
-    if code == -4:
+    if code == -5:
         raise UnprocessableEntity(
             message="Нет такой стадии реализации!",
-            num=5,
+            num=6,
             description="Попробуйте выбрать стадию реализации еще раз!",
             path="$.body"
         )
-    if code == -5:
+    if code == -6:
         raise UnprocessableEntity(
             message="Нет таких компетенций!",
-            num=6,
+            num=7,
             description="Попробуйте выбрать компетенции партнера еще раз!",
             path="$.body"
         )
@@ -190,10 +188,80 @@ def get_data(
     data = crud_project.get_multi_project(db=session, user_id=user_id)
     return ListOfEntityResponse(data=data)
 
-# Когда выводим project.user_id нужно ли выводить данные пользователя?
-# Можно ли вводить project_id в Header?
-# Надо сделать delete, тоже в header project_id указывать
+
+# Изменить данные проекта
+@router.put('/project/{project_id}',
+            response_model=SingleEntityResponse[ProjectGet],
+            name='Изменить данные проекта',
+            description='Изменить данные текущего проекта',
+            tags=['Данные проекта']
+            )
+def update_user(
+        request: Request,
+        new_data: ProjectCreate,
+        project_id: int = Path(..., title='Id проекта'),
+        current_user=Depends(deps.get_current_user_by_bearer),
+        session=Depends(deps.get_db),
+):
+    # Код, который проверяет есть ли объект с таким именем в базе данных
+    project, code, indexes = crud_project.update_project(db=session, project=new_data, user_id=current_user.id, project_id=project_id)
+    if code == -1:
+        raise UnprocessableEntity(
+            message="Проект с таким именем уже есть",
+            num=2,
+            description="поменяйте имя проекта",
+            path="$.body"
+        )
+    if code == -2:
+        raise UnprocessableEntity(
+            message="Нет такого пользователя",
+            num=3,
+            description="Попробуйте зайти заново",
+            path="$.body",
+        )
+    if code == -3:
+        raise UnprocessableEntity(
+            message="Проект не принадлежит пользователю ",
+            num=4,
+            description="Попробуйте изменить свой проект ",
+            path="$.body",
+        )
+    if code == -4:
+        raise UnprocessableEntity(
+            message="Нет такого города!",
+            num=5,
+            description="Попробуйте выбрать город еще раз!",
+            path="$.body"
+        )
+    if code == -5:
+        raise UnprocessableEntity(
+            message="Нет такой сферы деятельности",
+            num=6,
+            description="Попробуйте выбрать сферу деятельности заново!",
+            path="$.body"
+        )
+
+    if code == -6:
+        raise UnprocessableEntity(
+            message="Нет такой стадии реализации!",
+            num=7,
+            description="Попробуйте выбрать стадию реализации еще раз!",
+            path="$.body"
+        )
+    if code == -7:
+        raise UnprocessableEntity(
+            message="Нет таких компетенций!",
+            num=8,
+            description="Попробуйте выбрать компетенции партнера еще раз!",
+            path="$.body"
+        )
+    return SingleEntityResponse(data=get_project(project=project))
+
+
+# Когда выводим project.user_id нужно ли выводить краткую информацию о пользователе?
 #
-# Нужно ли запрещать пользователям называть проекты одинаково?
 # Нужно ли запрещать пользователям создавать проекты с пустыми названиями?
 # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjU4NTY0MjE2LCJpYXQiOjE2NTc4NzMwMTYsIm5iZiI6MTY1Nzg3MzAxNiwianRpIjoiMTcxNjJjMjAtMWUxZC00ZjRiLWJjZGEtZTFmZGI2ZjM3NmNhIn0.iINXp1BASqZ0MCtC7ME2cQyy3YV1rbinM6V_nty17h8
+
+if __name__ == "__main":
+    logging.info('Running...')
