@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Date, ForeignKey, Table
+from sqlalchemy import Boolean, Column, Integer, String, Date, ForeignKey, Table, UniqueConstraint
 
 from sqlalchemy.orm import relationship
 
@@ -12,7 +12,7 @@ class Project(Base):
     __tablename__ = 'projects'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    name = Column(String)
+    name = Column(String, unique=True)  # nullable=False
 
     location_id = Column(Integer, ForeignKey("locations.id", ondelete="SET NULL"))  # City
 
@@ -38,6 +38,7 @@ class Project(Base):
                                                back_populates='project', cascade="all, delete")
     partner_competencies_of_project = relationship('PartnerCompetenceOfProject',
                                                    back_populates='project', cascade="all, delete")
+    __table_args__ = (UniqueConstraint('user_id', 'name'),)
 
 
 # Вопрос:

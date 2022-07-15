@@ -2,7 +2,7 @@ import datetime
 import os
 import shutil
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Any, Tuple
 
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
@@ -21,6 +21,12 @@ from app.crud.crud_activity_sphere_of_project import crud_activity_sphere_of_pro
 from app.schemas.activity_sphere_of_project import ActivitySphereOfProjectCreate
 
 from app.models import ActivitySpheresOfProject, PartnerCompetenceOfProject
+
+from app.core.response import Paginator
+from app.crud.base import ModelType
+from app.utils import pagination
+
+from app.exceptions import UnfoundEntity
 
 DATA_FOLDER_PROJECT = "./static/Photo_project/"
 
@@ -82,13 +88,10 @@ class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
                                                                         activity_of_sphere_id=activity_sphere.id)
                 crud_activity_sphere_of_project.create(db=db, obj_in=activity_sphere_project)
         # Смотри crud_story
-        # return "123123"
-        db_activity_project = db.query(ActivitySpheresOfProject).\
-            filter(ActivitySpheresOfProject.project_id == project_id).all()
-        db_competence_project = db.query(PartnerCompetenceOfProject).\
-            filter(PartnerCompetenceOfProject.project_id == project_id).all()
+        db.query(ActivitySpheresOfProject).filter(ActivitySpheresOfProject.project_id == project_id).all()
+        db.query(PartnerCompetenceOfProject).filter(PartnerCompetenceOfProject.project_id == project_id).all()
 
-        return db_obj, db_competence_project, db_activity_project
+        return db_obj, 0, None
 
     # Должно сохранять фото год, месяц, день,
     def adding_photo(self, file: Optional[UploadFile]):
@@ -115,6 +118,35 @@ class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
             file.file.close()  # удаляет временный
 
         return path_for_url
+
+    # Хуня какая-то
+    # def get_multi_project(
+    #         self, db: Session, *, page: Optional[int] = None, user_id: int
+    # ) -> Tuple[List[ModelType], Paginator]:
+    #     query = db.query(self.model.id).filter(self.model.user_id == user_id)
+    #     query_id = []
+    #     for quer in query:
+    #         query_id.append(quer.id)
+    #     return pagination.get_page(query, page)
+
+    def get_multi_project(self, db: Session, *, user_id: int):
+        requests = db.query(Project).filter(Project.user_id == user_id)
+        query_id = []
+        for query in requests:
+            query_id.append(query.id)
+        if not query_id:
+            raise UnfoundEntity(message="Нет проектов",
+                                num=1,
+                                description="Нет проектов",
+                                path="$.body",
+                                )
+        return query_id
+
+    def get_by_name(self, db: Session, name: str):
+        return db.query(self.model).filter(self.model.name == name).first()
+
+    def getting(self, db: Session, user_id: int, project_id: int):
+        return db.query(self.model).filter(self.model.user_id == user_id, self.model.id == project_id).first()
 
 
 crud_project = CrudProject(Project)
