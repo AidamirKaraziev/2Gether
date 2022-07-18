@@ -3,7 +3,6 @@ import logging
 from fastapi import APIRouter, Depends, Header, Body, File, UploadFile
 
 
-from app.crud.crud_verif_code import VerifCodesServices
 from app.core.greensms import verif_code
 from app.schemas.verif_code import VerifCodeCreate, VerifCodeSaveOnBase, VerifCodeGet
 from app.core.response import SingleEntityResponse
@@ -27,3 +26,7 @@ def create_verif_code(
     service.create(db=session, obj_in=case_for_save)
 
     return SingleEntityResponse(data=VerifCodeGet(code=code))
+
+
+if __name__ == "__main":
+    logging.info('Running...')

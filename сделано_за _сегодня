@@ -1,0 +1,35 @@
+Написал Апи по созданию partner_competence
+В таблицу partner_competence сделать поле name unique
+Добавить в апи обработчик исключений
+
+Добавил в базовый crud get_by_name
+
+Написал Апи по созданию activity_sphere, сразу с добавлением картинки
+    Путь к файлу должен быть с хостом или просто папка                     ???????
+
+
+# Вот это не знаю как правильнее реализовать, в одной апи или в двух
+
+Написал апи по Изменению  activity_sphere, вместе с картинкой в одной апи()
+    Написать апи для добавления картинки в папку
+
+Изменил getters activity_sphere
+
+Написание модели для модераторов
+    Администратор будет полностью сам создавать модератора               ??????????
+    админ и модераторы будут находиться в общей таблице (Используя флаг is_superuser)??????
+    Написал AreaOfResponsibility(модель)
+    Схемы для AreaOfResponsibility
+    Crud для AreaOfResponsibility
+    getter для AreaOfResponsibility
+    апи по выводу всех зон ответственности AreaOfResponsibility
+
+Написал апи для создания модератора
+    Написать апи для изменения модератора
+        есть ли функционал изменения профиля у модераторов или все остается неизменным, как создал Админ ?????
+    Написать апи для вывода информации о модераторе через id
+    Написать апи по выводу данных всех модераторов
+    Написать апи по изменению фото для модератора
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNjU4ODQzMzkwLCJpYXQiOjE2NTgxNTIxOTAsIm5iZiI6MTY1ODE1MjE5MCwianRpIjoiOTQwOTZlZTAtMzdlYi00MzhiLWEzNzAtN2QwNTZlMzFjNjQ4In0.7TQQL9JZ58gWy3rTKlRFe2MMjtThd_94cVYHG7OocHY

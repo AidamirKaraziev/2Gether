@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 class PartnerCompetence(Base):
     __tablename__ = 'partner_competencies'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, unique=True, nullable=False)
 
     # как я понял
     partner_competencies_of_project = relationship('PartnerCompetenceOfProject',

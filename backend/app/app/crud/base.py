@@ -88,3 +88,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.delete(obj)
         db.commit()
         return obj
+
+    def get_by_name(self, db: Session, name: str) -> Optional[ModelType]:
+        return db.query(self.model).filter(self.model.name == name).first()

@@ -22,10 +22,6 @@ from app.schemas.activity_sphere_of_project import ActivitySphereOfProjectCreate
 
 from app.models import ActivitySpheresOfProject, PartnerCompetenceOfProject
 
-from app.core.response import Paginator
-from app.crud.base import ModelType
-from app.utils import pagination
-
 from app.exceptions import UnfoundEntity
 
 DATA_FOLDER_PROJECT = "./static/Photo_project/"
@@ -122,16 +118,6 @@ class CrudProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
             file.file.close()  # удаляет временный
 
         return path_for_url
-
-    # Хуня какая-то
-    # def get_multi_project(
-    #         self, db: Session, *, page: Optional[int] = None, user_id: int
-    # ) -> Tuple[List[ModelType], Paginator]:
-    #     query = db.query(self.model.id).filter(self.model.user_id == user_id)
-    #     query_id = []
-    #     for quer in query:
-    #         query_id.append(quer.id)
-    #     return pagination.get_page(query, page)
 
     def get_multi_project(self, db: Session, *, user_id: int):
         requests = db.query(Project).filter(Project.user_id == user_id)

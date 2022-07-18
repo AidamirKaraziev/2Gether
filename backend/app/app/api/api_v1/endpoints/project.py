@@ -37,6 +37,7 @@ def create_project(
 
     project, code, indexes = crud_project.create_project(db=session, project=new_data, user_id=current_user.id)
 
+    # обработка исключений того что вернул
     if code == -1:
         raise UnprocessableEntity(
             message="Проект с таким именем уже есть",
@@ -44,7 +45,6 @@ def create_project(
             description="поменяйте имя проекта",
             path="$.body"
         )
-    # обработка исключений того что вернул
     if code == -2:
         raise UnprocessableEntity(
             message="Нет такого пользователя",
@@ -178,13 +178,8 @@ def remove_with_path(
 def get_data(
         user_id: int = Path(..., title='Id пользователя'),
         session=Depends(deps.get_db),
-        page: int = Query(1, title="Номер страницы")
+        # page: int = Query(1, title="Номер страницы")
 ):
-    # logging.info(crud_project.get_multi_project(db=session, page=None, user_id=user_id))
-
-    # data, paginator = crud_project.get_multi_project(db=session, page=page, user_id=user_id)
-    # return ListOfEntityResponse(data=[get_project(datum) for datum in data], meta=Meta(paginator=paginator))
-
     data = crud_project.get_multi_project(db=session, user_id=user_id)
     return ListOfEntityResponse(data=data)
 
@@ -196,14 +191,12 @@ def get_data(
             description='Изменить данные текущего проекта',
             tags=['Данные проекта']
             )
-def update_user(
-        request: Request,
+def update_project(
         new_data: ProjectCreate,
         project_id: int = Path(..., title='Id проекта'),
         current_user=Depends(deps.get_current_user_by_bearer),
         session=Depends(deps.get_db),
 ):
-    # Код, который проверяет есть ли объект с таким именем в базе данных
     project, code, indexes = crud_project.update_project(db=session, project=new_data, user_id=current_user.id, project_id=project_id)
     if code == -1:
         raise UnprocessableEntity(
@@ -259,7 +252,10 @@ def update_user(
 
 
 # Когда выводим project.user_id нужно ли выводить краткую информацию о пользователе?
-#
+# В апи по выводу всех проектов юзера, надо проверять есть ли такой юзер?
+# Написать апи для добавления путей хранения картинок для сфер деятельности(АДМИНКА)
+# Создание сфер деятельности Нужно написать в одной апи или в двух(+картинки)
+
 # Нужно ли запрещать пользователям создавать проекты с пустыми названиями?
 # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjU4NTY0MjE2LCJpYXQiOjE2NTc4NzMwMTYsIm5iZiI6MTY1Nzg3MzAxNiwianRpIjoiMTcxNjJjMjAtMWUxZC00ZjRiLWJjZGEtZTFmZGI2ZjM3NmNhIn0.iINXp1BASqZ0MCtC7ME2cQyy3YV1rbinM6V_nty17h8
 

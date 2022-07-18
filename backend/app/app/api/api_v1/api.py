@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.api_v1.endpoints import entrance, verif_code, users, \
-    location, stage_of_implementation, partner_competence, activity_sphere, project
+    location, stage_of_implementation, partner_competence, activity_sphere, project, area_of_responsibility, moderator
 
 
 api_router = APIRouter()
@@ -15,3 +15,5 @@ api_router.include_router(stage_of_implementation.router)
 api_router.include_router(partner_competence.router)
 api_router.include_router(activity_sphere.router)
 api_router.include_router(project.router)
+api_router.include_router(area_of_responsibility.router)
+api_router.include_router(moderator.router)

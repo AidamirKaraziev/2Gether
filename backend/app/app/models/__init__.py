@@ -10,3 +10,5 @@ from .partner_competence import PartnerCompetence
 from .partner_competence_of_project import PartnerCompetenceOfProject
 from .activity_sphere import ActivitySphere
 from .activity_sphere_of_project import ActivitySpheresOfProject
+from .area_of_responsibility import AreaOfResponsibility
+from .moderator import Moderator

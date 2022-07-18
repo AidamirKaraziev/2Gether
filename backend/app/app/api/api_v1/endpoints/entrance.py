@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Header, Request
@@ -87,3 +88,7 @@ def check_code(
     # Заменить снизу на генерацию и отправку токена
     token = create_token(subject=user.id)
     return SingleEntityResponse(data=TokenBase(token=token))
+
+
+if __name__ == "__main":
+    logging.info('Running...')
