@@ -21,7 +21,7 @@ class Device(Base):
     created = Column(DateTime(), nullable=True, default=datetime.utcnow)
     detected_os = Column(String(), nullable=True)
 
-    user_id = Column(Integer(), ForeignKey(User.id), nullable=False)
+    user_id = Column(Integer(), ForeignKey(User.id, ondelete="CASCADE"), nullable=False)
 
     user = relationship(User, back_populates='devices')
     firebase_tokens = relationship("FirebaseToken", cascade="all, delete-orphan", back_populates="device")

@@ -7,11 +7,13 @@ from app.db.base_class import Base
 from app.models import Location
 from app.models.stage_of_implementation import StageOfImplementation
 
+from app.models import User
+
 
 class Project(Base):
     __tablename__ = 'projects'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     name = Column(String, unique=True)  # nullable=False
 
     location_id = Column(Integer, ForeignKey("locations.id", ondelete="SET NULL"))  # City
@@ -38,6 +40,9 @@ class Project(Base):
                                                back_populates='project', cascade="all, delete")
     partner_competencies_of_project = relationship('PartnerCompetenceOfProject',
                                                    back_populates='project', cascade="all, delete")
+    # user = relationship('User', back_populates='projects', cascade=)
+    # user = relationship("User", cascade="all, delete")
+    user = relationship("User", back_populates="project")
     __table_args__ = (UniqueConstraint('user_id', 'name'),)
 
 

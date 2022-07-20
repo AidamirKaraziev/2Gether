@@ -5,7 +5,7 @@
 Добавил в базовый crud get_by_name
 
 Написал Апи по созданию activity_sphere, сразу с добавлением картинки
-    Путь к файлу должен быть с хостом или просто папка                     ???????
+    Путь к файлу должен быть с хостом или просто папка activity_sphere                     ???????
 
 
 # Вот это не знаю как правильнее реализовать, в одной апи или в двух
@@ -30,6 +30,15 @@
     Написать апи для вывода информации о модераторе через id
     Написать апи по выводу данных всех модераторов
     Написать апи по изменению фото для модератора
+
+Зашифровать пароль в модераторах????
+
+Проверку location и area_of_responsibility в эндопоинте(is_superuser)
+    надо ли проверять birthday не в будущем ли         ????????????
+    Зашифровать пароль в модераторах????
+    Путь к файлу должен быть с хостом или просто папка activity_sphere                   ???????
+    показать апи добавления activity_sphere(можно ли в одной апи)  ??????
+
 
 
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNjU4ODQzMzkwLCJpYXQiOjE2NTgxNTIxOTAsIm5iZiI6MTY1ODE1MjE5MCwianRpIjoiOTQwOTZlZTAtMzdlYi00MzhiLWEzNzAtN2QwNTZlMzFjNjQ4In0.7TQQL9JZ58gWy3rTKlRFe2MMjtThd_94cVYHG7OocHY

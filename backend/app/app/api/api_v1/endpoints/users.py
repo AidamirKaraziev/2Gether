@@ -41,6 +41,7 @@ async def get_site(filename):
     return Response(content, media_type=content_type)
 
 
+# GET
 @router.get('/users/me/',
             response_model=SingleEntityResponse[UserBase],
             name='Получить данные профиля',

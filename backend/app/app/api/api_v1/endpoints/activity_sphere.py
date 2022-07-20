@@ -41,27 +41,27 @@ def get_data(
 
 
 # Написать апи по добавлению новых сфер деятельности с сохранением эмблемки
-@router.post('/activity-sphere/',
-             response_model=SingleEntityResponse,
-             name='Добавить сферу деятельности',
-             description='Добавить сферу деятельности',
-             tags=['Админка']
-             )
-def create_activity_sphere(
-        new_data: ActivitySphereCreate,
-        # current_user=Depends(deps.get_current_user_by_bearer),
-        session=Depends(deps.get_db),
-):
-    obj = crud_activity_sphere.get_by_name(db=session, name=new_data.name)
-    if obj is not None:
-        raise UnprocessableEntity(
-            message="Такая сфера деятельности уже имеется",
-            num=1,
-            description="Сфера деятельности с таким названием уже имеется!",
-            path="$.body"
-        )
-    return SingleEntityResponse(
-        data=get_activity_sphere(crud_activity_sphere.create(db=session, obj_in=new_data)))
+# @router.post('/activity-sphere/',
+#              response_model=SingleEntityResponse,
+#              name='Добавить сферу деятельности',
+#              description='Добавить сферу деятельности',
+#              tags=['Админка']
+#              )
+# def create_activity_sphere(
+#         new_data: ActivitySphereCreate,
+#         # current_user=Depends(deps.get_current_user_by_bearer),
+#         session=Depends(deps.get_db),
+# ):
+#     obj = crud_activity_sphere.get_by_name(db=session, name=new_data.name)
+#     if obj is not None:
+#         raise UnprocessableEntity(
+#             message="Такая сфера деятельности уже имеется",
+#             num=1,
+#             description="Сфера деятельности с таким названием уже имеется!",
+#             path="$.body"
+#         )
+#     return SingleEntityResponse(
+#         data=get_activity_sphere(crud_activity_sphere.create(db=session, obj_in=new_data)))
 
 
 # Эксперимент: Сделать создание и добавление картинки в одном апи

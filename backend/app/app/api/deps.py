@@ -11,6 +11,8 @@ from app.core import security
 from app.core.config import settings
 from app.db.session import SessionLocal
 
+from app.crud.crud_moderator import crud_moderator
+
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )
@@ -86,6 +88,42 @@ def get_current_active_superuser(
     return current_user
 
 
+def get_current_moderator(
+        db: Session = Depends(get_db), token: str = Depends()
+) -> models.Moderator:
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY_MODERATOR, algorithms=[security.ALGORITHM]
+        )
+        token_data = schemas.token.TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    moderator = crud_moderator.get(db, id=token_data.sub)
+    if not moderator:
+        raise HTTPException(status_code=404, detail="moderator not found")
+    return moderator
+
+
+def get_current_moderator_by_bearer(db: Session = Depends(get_db), http_credentials=Depends(security_1)):
+
+    token = http_credentials.credentials
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY_MODERATOR, algorithms=[security.ALGORITHM]
+        )
+        token_data = schemas.token.TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    moderator = crud_moderator.get(db=db, id=token_data.sub)
+    if not moderator:
+        raise HTTPException(status_code=404, detail="moderator not found")
+    return moderator
 # Из старого, возможно норм
 # def get_current_user(
 #     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
