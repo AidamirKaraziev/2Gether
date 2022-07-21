@@ -24,7 +24,7 @@ router = APIRouter()
 @router.post('/sign-in/', response_model=SingleEntityResponse[TokenBase],
              name='Войти в приложение',
              description='Войти в приложение, используя телефон и код подтверждения',
-             tags=['Вход'])
+             tags=['Вход / Мобильное приложение'])
 def check_code(
     request: Request,
     check_code_data: CheckCode,

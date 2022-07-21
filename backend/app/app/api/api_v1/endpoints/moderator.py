@@ -28,15 +28,31 @@ from fastapi.params import Path
 from app.crud.area_of_responsibility import crud_area_of_responsibility
 from app.crud.crud_location import crud_location
 
+from app.utils.time_stamp import date_from_timestamp
 
 router = APIRouter()
 
 
-@router.post('/cp/moderators/',
+# Вход по логину и паролю
+@router.post('/cp/sign-in/', response_model=SingleEntityResponse[TokenBase],
+             name='Войти в админ панель',
+             description='Войти в админ панель',
+             tags=['Вход / Админ панель'])
+def entrance(
+    moderator: ModeratorEntrance,
+    session=Depends(deps.get_db),
+):
+    db_obj = crud_moderator.get_moderator(session, moderator=moderator)
+    token = create_token_moderator(subject=db_obj.id)
+    return SingleEntityResponse(data=TokenBase(token=token))
+
+
+# Создание модератора
+@router.post('/cp/moderators/me/',
              response_model=SingleEntityResponse[ModeratorGet],
              name='Создать модератора',
              description='Создать модератора, ',
-             tags=['Админ']
+             tags=['Админ панель / Модератор']
              )
 def create_moderator(
         request: Request,
@@ -70,56 +86,17 @@ def create_moderator(
         )
     psw = get_password_hash(password=new_data.password)
     new_data.password = psw
+    if new_data.birthday is not None:
+        new_data.birthday = date_from_timestamp(new_data.birthday)
     return SingleEntityResponse(data=get_moderator(crud_moderator.create(db=session, obj_in=new_data), request=request))
 
 
-# Вход по логину и паролю
-@router.post('/cp/sign-in/', response_model=SingleEntityResponse[TokenBase],
-             name='Войти в админ панель',
-             description='Войти в админ панель',
-             tags=['Админка'])
-def entrance(
-    moderator: ModeratorEntrance,
-    session=Depends(deps.get_db),
-):
-    db_obj = crud_moderator.get_moderator(session, moderator=moderator)
-    token = create_token_moderator(subject=db_obj.id)
-    return SingleEntityResponse(data=TokenBase(token=token))
-
-
-# GET
-@router.get('/cp/profile/',
-            response_model=SingleEntityResponse[ModeratorGet],
-            name='Получить данные профиля модератора',
-            description='Получение всех  данных профиля модератора, по токену',
-            tags=['Модератор']
-            )
-def get_data(
-        request: Request,
-        current_moderator=Depends(deps.get_current_moderator_by_bearer),
-):
-    return SingleEntityResponse(data=get_moderator(current_moderator, request=request))  # request=request
-
-
-# Апи удаления модератора
-@router.delete("/cp/moderators/profile/",
-               response_model=SingleEntityResponse,
-               name='Удаляет текущего модератора',
-               description='Модератор сам удаляет свой акк',
-               tags=['Модератор'])
-def remove_with_path(
-        current_moderator=Depends(deps.get_current_moderator_by_bearer),
-        session=Depends(deps.get_db)
-):
-    return SingleEntityResponse(data=crud_moderator.remove(db=session, id=current_moderator.id))
-
-
 # Апи удаления модератора АДМИНОМ
-@router.delete("/cp/moderators/{moderator_id}/",
+@router.delete("/cp/moderators/me/{moderator_id}/",
                response_model=SingleEntityResponse,
                name='Удаление модератора',
                description='Модератора удаляет админ',
-               tags=['Админ'])
+               tags=['Админ панель / Модератор'])
 def remove_with_path(
         moderator_id: int = Path(...),
         current_moderator=Depends(deps.get_current_moderator_by_bearer),
@@ -143,12 +120,39 @@ def remove_with_path(
     return SingleEntityResponse(data=crud_moderator.remove(db=session, id=db_obj.id))
 
 
+# GET
+@router.get('/cp/moderators/me/',
+            response_model=SingleEntityResponse[ModeratorGet],
+            name='Получить данные профиля модератора',
+            description='Получение всех  данных профиля модератора, по токену',
+            tags=['Админ панель / Профиль']
+            )
+def get_data(
+        request: Request,
+        current_moderator=Depends(deps.get_current_moderator_by_bearer),
+):
+    return SingleEntityResponse(data=get_moderator(current_moderator, request=request))  # request=request
+
+
+# Апи удаления модератора
+@router.delete("/cp/moderators/me/",
+               response_model=SingleEntityResponse[ModeratorGet],
+               name='Удаляет текущего модератора',
+               description='Модератор сам удаляет свой акк',
+               tags=['Админ панель / Профиль'])
+def remove_with_path(
+        current_moderator=Depends(deps.get_current_moderator_by_bearer),
+        session=Depends(deps.get_db)
+):
+    return SingleEntityResponse(data=crud_moderator.remove(db=session, id=current_moderator.id))
+
+
 # Изменить данные модератора
-@router.put('/cp/moderators/profile/',
+@router.put('/cp/moderators/me/',
             response_model=SingleEntityResponse[ModeratorGet],
             name='Изменить данные модератора',
             description='Изменить данные текущего модератора',
-            tags=['Модератор']
+            tags=['Админ панель / Профиль']
             )
 def update_moderator(
         request: Request,
@@ -191,16 +195,17 @@ def update_moderator(
                                 description="Попробуйте указать сферу деятельности еще раз!",
                                 path="$.body",
                                 )
-
+    if new_data.birthday is not None:
+        new_data.birthday = date_from_timestamp(new_data.birthday)
     crud_moderator.update(db=session, db_obj=current_moderator, obj_in=new_data)
     return SingleEntityResponse(data=get_moderator(current_moderator, request=request))
 
 
-@router.put("/cp/moderators/profile/photo/",
+@router.put("/cp/moderators/me/photos/",
             response_model=SingleEntityResponse[ModeratorGet],
             name='Изменить фотографию',
             description='Изменить фотографию в профиле, если отправить пустой файл сбрасывает фото в профиле',
-            tags=['Модератор'],
+            tags=['Админ панель / Профиль'],
             )
 def create_upload_file(
         request: Request,

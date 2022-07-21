@@ -1,3 +1,6 @@
+import datetime
+import time
+
 import hashlib
 import os
 from typing import Optional
@@ -13,6 +16,7 @@ from app.schemas.moderator import ModeratorCreate, ModeratorRequest
 
 from app.core.config import Settings, settings
 
+from app.utils.time_stamp import to_timestamp
 
 # def get_moderator(moderator: Moderator) -> Optional[ModeratorGet]:
 #     return ModeratorGet(
@@ -37,6 +41,7 @@ def get_moderator(moderator: Moderator, request: Optional[Request],
         url = request.url.hostname + config.API_V1_STR + "/static/"
         if moderator.photo is not None:
             moderator.photo = url + str(moderator.photo)
+    moderator.birthday = to_timestamp(moderator.birthday)
     return ModeratorGet(
         id=moderator.id,
         login=moderator.login,

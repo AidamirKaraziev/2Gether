@@ -12,14 +12,17 @@ class EntityError(ValueError):
         self.path = path
 
 
+# невозможно найти
 class UnfoundEntity(EntityError):
     http_status = 404
 
 
+# Недоступная сущность
 class InaccessibleEntity(EntityError):
     http_status = 403
 
 
+# эта операция не доступна для запрашиваемого
 class UnprocessableEntity(EntityError):
     http_status = 422
 

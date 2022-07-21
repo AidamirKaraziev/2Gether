@@ -24,6 +24,25 @@ class UserBase(BaseModel):
     telegram: Optional[str]
 
 
+class UserGet(BaseModel):
+    id: int
+    tel: str
+    first_name: Optional[str]
+    last_name: Optional[str]
+    birthday: Optional[int]
+    location: Optional[LocationGet]
+    photo_main: Optional[str]
+    photo_1: Optional[str]
+    photo_2: Optional[str]
+    basic_about_me: Optional[str]
+    job_title: Optional[str]
+    company: Optional[str]
+    about_me: Optional[str]
+    contact_phone: Optional[str]
+    telegram: Optional[str]
+
+
+
 class UserCreate(BaseModel):
     tel: str
 
@@ -44,7 +63,7 @@ class UserBasicUpdate(BaseModel):
 
     first_name: Optional[str] = Field(None, title="Имя ")
     last_name: Optional[str] = Field(None, title="Фамилия ")
-    birthday: Optional[Date] = Field(None, title="Дата рождения")
+    birthday: Optional[int] = Field(None, title="Дата рождения")
     location_id: Optional[int] = Field(None, title="Город ")
     basic_about_me: Optional[str] = Field(None, title="Основная информация 'Обо мне'")
     job_title: Optional[str]

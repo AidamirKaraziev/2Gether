@@ -11,11 +11,11 @@ router = APIRouter()
 
 
 # Вывод всех локаций
-@router.get('/area-of-responsibility/',
+@router.get('/responsibility-areas/',
             response_model=ListOfEntityResponse,
             name='Список зон ответственности',
             description='Получение списка всех зон ответственности',
-            tags=['Инструменты']
+            tags=['Мобильное приложение / Зоны ответственности']
             )
 def get_data(
         session=Depends(deps.get_db),

@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from fastapi import Request
@@ -9,8 +10,12 @@ from app.models import User
 
 from app.getters.location import get_location
 
+from app.utils.time_stamp import to_timestamp
 
-def get_user(user: User, request: Optional[Request], config: Settings = settings) -> UserBase:
+from app.schemas import UserGet
+
+
+def get_user(user: User, request: Optional[Request], config: Settings = settings) -> UserGet:
     if request is not None:
         url = request.url.hostname + config.API_V1_STR + "/static/"
         if user.photo_main is not None:
@@ -19,7 +24,8 @@ def get_user(user: User, request: Optional[Request], config: Settings = settings
             user.photo_1 = url + str(user.photo_1)
         if user.photo_2 is not None:
             user.photo_2 = url + str(user.photo_2)
-    return UserBase(
+    user.birthday = to_timestamp(user.birthday)
+    return UserGet(
         id=user.id,
         tel=user.tel,
         first_name=user.first_name,
