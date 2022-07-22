@@ -69,7 +69,7 @@ def create_partner_competence(
             name='Изменить название партнерской компетенции',
             description='Изменяет название партнерской компетенции',
             tags=['Админ панель / Партнерские компетенции'])
-def update_implementation_stages(
+def update_partner_competences(
         name: PartnerCompetenceUpdate,
         partner_competences_id: int = Path(..., title='Id партнерской компетенции'),
         session=Depends(deps.get_db)
@@ -105,12 +105,13 @@ def delete_partner_competences(
 ):
     if crud_partner_competence.get(db=session, id=partner_competences_id) is None:
         raise UnfoundEntity(
-            message="Стадии реализации с таким id нет!",
+            message="Партнерской компетенции с таким id нет!",
             num=1,
             description="Введите корректный id!",
             path="$.body"
         )
-    return SingleEntityResponse(data=crud_partner_competence.remove(db=session, id=partner_competences_id))
+    return SingleEntityResponse(data=get_partner_competence(
+        db_obj=crud_partner_competence.remove(db=session, id=partner_competences_id)))
 
 
 if __name__ == "__main":

@@ -3,7 +3,7 @@ from os.path import isfile
 from typing import Optional
 from mimetypes import guess_type
 
-from fastapi import APIRouter, Header, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Header, Depends, UploadFile, File, HTTPException, Query
 from fastapi import Response, Request
 from fastapi.params import Path
 
@@ -24,6 +24,7 @@ from app.exceptions import UnfoundEntity, UnprocessableEntity
 
 from app.utils.time_stamp import date_from_timestamp
 
+from app.core.response import Meta
 
 router = APIRouter()
 
@@ -208,6 +209,25 @@ def get_data(
 ):
     data = crud_project.get_multi_project(db=session, user_id=current_user.id)
     return ListOfEntityResponse(data=data)
+
+
+# GET ALL USERS
+@router.get('/users/',
+            response_model=ListOfEntityResponse,
+            name='Список данных всех профилей',
+            description='Получение списка всех данных профилей',
+            tags=['Мобильное приложение / Пользователи']
+            )
+def get_data(
+        request: Request,
+        session=Depends(deps.get_db),
+        page: int = Query(1, title="Номер страницы")
+):
+    logging.info(crud_location.get_multi(db=session, page=None))
+
+    data, paginator = crud_user.get_multi(db=session, page=page)
+
+    return ListOfEntityResponse(data=[get_user(datum, request=request) for datum in data], meta=Meta(paginator=paginator))
 
 
 if __name__ == "__main":

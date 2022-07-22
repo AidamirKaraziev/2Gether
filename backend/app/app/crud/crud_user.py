@@ -79,6 +79,11 @@ class CrudUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def adding_photo(self, db: Session, num, id_user: int, file: Optional[UploadFile]):
 
+        if file is None:
+            db.query(User).filter(User.id == id_user).update({f'photo_{num}': None})
+            db.commit()
+            return {"photo": None}
+
         filename = uuid.uuid4().hex + os.path.splitext(file.filename)[1]
         path_name = DATA_FOLDER + f"{id_user}/{num}/"
         element = ["Photo_users", str(id_user), num, filename]

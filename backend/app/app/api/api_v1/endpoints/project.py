@@ -18,6 +18,10 @@ from app.exceptions import UnprocessableEntity
 
 from app.core.response import ListOfEntityResponse, Meta
 
+from app.getters.project import get_project_for_db
+
+from app.getters.project import get_for_delete
+
 router = APIRouter()
 
 
@@ -28,6 +32,7 @@ router = APIRouter()
              tags=['Мобильное приложение / Проект']
              )
 def create_project(
+        request: Request,
         new_data: ProjectCreate,
         current_user=Depends(deps.get_current_user_by_bearer),
         session=Depends(deps.get_db),
@@ -82,7 +87,7 @@ def create_project(
             path="$.body"
         )
 
-    return SingleEntityResponse(data=get_project(project=project))
+    return SingleEntityResponse(data=get_project(project=project, request=request))
 
 
 # Добавление фото проекта, загрузка их на сервер, возвращение ссылок на фото
@@ -131,6 +136,7 @@ def create_upload_file(
             tags=['Мобильное приложение / Проект']
             )
 def get_data(
+        request: Request,
         project_id: int = Path(..., title='Id проекта'),
         session=Depends(deps.get_db),
 ):
@@ -142,30 +148,38 @@ def get_data(
             description="Попробуйте еще раз!",
             path="$.body"
         )
-    return SingleEntityResponse(data=get_project(project=project))
+    return SingleEntityResponse(data=get_project(project=project, request=request))
 
 
-# Апи удаления Проекта ПОКА ЧТО НЕ РАБОТАЕТ, ПОТОМУ ЧТО ДЕВАЙСЫ МОРОСЯТ!!!!!
+# DELETE
 @router.delete("/projects/{project_id}/",
                response_model=SingleEntityResponse,
                name='Удаляет проект',
                description='Полностью удаляет проект',
                tags=['Мобильное приложение / Проект'])
 def remove_with_path(
+        request: Request,
         project_id: int = Path(..., title='Id проекта'),
         current_user=Depends(deps.get_current_user_by_bearer),
         session=Depends(deps.get_db)
 ):
     # проверить принадлежит ли этот проект юзеру
     check_project = crud_project.getting(db=session, user_id=current_user.id, project_id=project_id)
-    if check_project is not None:
+    if crud_project.get(db=session, id=project_id) is None:
+        raise UnfoundEntity(message="Нет такого проекта",
+                            num=1,
+                            description="Введите id существующего проекта",
+                            path="$.body",
+                            )
+    if check_project is None:
         raise UnfoundEntity(message="Проект вам не принадлежит",
                             num=1,
                             description="Можете удалять только свои проекты",
                             path="$.body",
                             )
-
-    return SingleEntityResponse(data=crud_project.remove(db=session, id=project_id))
+    # ВОТ СДЕСЬ МОЖНО СДЕЛАТЬ ЛУЧШЕ!!!!!!!!
+    return SingleEntityResponse(data=get_for_delete(project=crud_project.remove(db=session, id=project_id)))
+    # ПАНИМАЕШЬ?
 
 
 # Вывод всех проектов пользователя
@@ -176,6 +190,7 @@ def remove_with_path(
             tags=['Мобильное приложение / Профиль']
             )
 def get_data(
+        request: Request,
         user_id: int = Path(..., title='Id пользователя'),
         session=Depends(deps.get_db),
         # page: int = Query(1, title="Номер страницы")
@@ -184,7 +199,7 @@ def get_data(
     return ListOfEntityResponse(data=data)
 
 
-# Изменить данные проекта
+# UPDATE
 @router.put('/projects/{project_id}/',
             response_model=SingleEntityResponse[ProjectGet],
             name='Изменить данные проекта',
@@ -192,32 +207,33 @@ def get_data(
             tags=['Мобильное приложение / Проект']
             )
 def update_project(
+        request: Request,
         new_data: ProjectCreate,
         project_id: int = Path(..., title='Id проекта'),
         current_user=Depends(deps.get_current_user_by_bearer),
         session=Depends(deps.get_db),
 ):
-    project, code, indexes = crud_project.update_project(db=session, project=new_data, user_id=current_user.id, project_id=project_id)
+    project, code, indexes = crud_project.update_project(db=session, obj_in=new_data, user_id=current_user.id, project_id=project_id)
     if code == -1:
-        raise UnprocessableEntity(
-            message="Проект с таким именем уже есть",
+        raise UnfoundEntity(
+            message="Нет такого проекта",
             num=2,
-            description="поменяйте имя проекта",
+            description="Поменяйте ID проекта",
             path="$.body"
         )
     if code == -2:
-        raise UnprocessableEntity(
-            message="Нет такого пользователя",
-            num=3,
-            description="Попробуйте зайти заново",
-            path="$.body",
-        )
-    if code == -3:
         raise UnprocessableEntity(
             message="Проект не принадлежит пользователю ",
             num=4,
             description="Попробуйте изменить свой проект ",
             path="$.body",
+        )
+    if code == -3:
+        raise UnprocessableEntity(
+            message="Проект с таким именем уже есть",
+            num=2,
+            description="поменяйте имя проекта",
+            path="$.body"
         )
     if code == -4:
         raise UnprocessableEntity(
@@ -233,7 +249,6 @@ def update_project(
             description="Попробуйте выбрать сферу деятельности заново!",
             path="$.body"
         )
-
     if code == -6:
         raise UnprocessableEntity(
             message="Нет такой стадии реализации!",
@@ -248,7 +263,15 @@ def update_project(
             description="Попробуйте выбрать компетенции партнера еще раз!",
             path="$.body"
         )
-    return SingleEntityResponse(data=get_project(project=project))
+    # if code == -2:
+    #     raise UnprocessableEntity(
+    #         message="Нет такого пользователя",
+    #         num=3,
+    #         description="Попробуйте зайти заново",
+    #         path="$.body",
+    #     )
+
+    return SingleEntityResponse(data=get_project(project=project, request=request))
 
 
 # Когда выводим project.user_id нужно ли выводить краткую информацию о пользователе?

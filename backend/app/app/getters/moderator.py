@@ -33,6 +33,7 @@ from app.utils.time_stamp import to_timestamp
 #         average_first_response_time=moderator.average_first_response_time,
 #         is_superuser=moderator.is_superuser
 #     )
+from app.schemas.moderator import ModeratorGetDelete
 
 
 def get_moderator(moderator: Moderator, request: Optional[Request],
@@ -41,6 +42,8 @@ def get_moderator(moderator: Moderator, request: Optional[Request],
         url = request.url.hostname + config.API_V1_STR + "/static/"
         if moderator.photo is not None:
             moderator.photo = url + str(moderator.photo)
+        else:
+            moderator.photo = None
     moderator.birthday = to_timestamp(moderator.birthday)
     return ModeratorGet(
         id=moderator.id,
@@ -53,6 +56,24 @@ def get_moderator(moderator: Moderator, request: Optional[Request],
         photo=moderator.photo,
         area_of_responsibility=get_area_of_responsibility(
             moderator.area_of_responsibility) if moderator.area_of_responsibility is not None else None,
+        average_first_response_time=moderator.average_first_response_time,
+        is_superuser=moderator.is_superuser
+    )
+
+
+def get_moderator_delete(moderator: Moderator, request: Optional[Request],
+                         config: Settings = settings) -> Optional[ModeratorGetDelete]:
+    moderator.birthday = to_timestamp(moderator.birthday)
+    return ModeratorGetDelete(
+        id=moderator.id,
+        login=moderator.login,
+        tel=moderator.tel,
+        first_name=moderator.first_name,
+        last_name=moderator.last_name,
+        birthday=moderator.birthday,
+        location=moderator.location_id,
+        photo=moderator.photo,
+        area_of_responsibility=moderator.area_of_responsibility_id,
         average_first_response_time=moderator.average_first_response_time,
         is_superuser=moderator.is_superuser
     )

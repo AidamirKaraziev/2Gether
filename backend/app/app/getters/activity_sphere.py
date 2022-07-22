@@ -9,12 +9,14 @@ from app.schemas.activity_sphere import ActivitySpherePicture
 
 def get_activity_sphere(db_obj: ActivitySphere, request: Optional[Request],
                         config: Settings = settings) -> Optional[ActivitySphereGet]:
-    if db_obj.picture is None or request is None:
+    if db_obj.picture is None:
+        db_obj.picture = None
+    else:
+        url = request.url.hostname + config.API_V1_STR + "/static/"
+        db_obj.picture = str(url + str(db_obj.picture))
+    if request is None:
         return None
-    print(111111111111)
-    url = request.url.hostname + config.API_V1_STR + "/static/"
-    db_obj.picture = str(url + str(db_obj.picture))
-    print(2222222222222222)
+
     return ActivitySphereGet(
         id=db_obj.id,
         name=db_obj.name,

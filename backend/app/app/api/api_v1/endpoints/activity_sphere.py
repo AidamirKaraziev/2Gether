@@ -43,6 +43,7 @@ def get_data(
     return ListOfEntityResponse(data=[get_activity_sphere(request=request, db_obj=datum) for datum in data], meta=Meta(paginator=paginator))
 
 
+# CREATE
 @router.post("/activity-spheres/",
              response_model=SingleEntityResponse,
              name='Добавить сферу деятельности',
@@ -83,19 +84,19 @@ def create_upload_file(
 
 
 # UPDATE
-@router.put('/activity-spheres/{activity_spheres_id}/',
+@router.put('/activity-spheres/{activity_sphere_id}/',
             response_model=SingleEntityResponse,
-            name='Изменить название сферы деятельности',
+            name='Изменить сферу деятельности',
             description='Изменяет название сферы деятельности',
             tags=['Админ панель / Сферы деятельности'])
 def update_activity_spheres_name(
         request: Request,
         name: ActivitySphereUpdate,
-        activity_spheres_id: int = Path(..., title='Id партнерской компетенции'),
+        activity_sphere_id: int = Path(..., title='Id партнерской компетенции'),
         session=Depends(deps.get_db)
 ):
     activity_spheres, code, indexes = crud_activity_sphere.update_activity_spheres(
-        db=session, new_data=name, id=activity_spheres_id)
+        db=session, new_data=name, id=activity_sphere_id)
     if code == -1:
         raise UnfoundEntity(
             message="Сферы деятельности с таким id нет!",
@@ -114,7 +115,7 @@ def update_activity_spheres_name(
 
 
 # UPDATE PHOTOS
-@router.put('/activity-spheres/picture/{activity_spheres_id}/',
+@router.put('/activity-spheres/{activity_sphere_id}/picture/',
             response_model=SingleEntityResponse,
             name='Изменить картинку сферы деятельности',
             description='Изменяет название сферы деятельности',
@@ -123,10 +124,10 @@ def update_upload_file(
         request: Request,
         file: Optional[UploadFile] = File(None),
         # name: ActivitySphereUpdate,
-        activity_spheres_id: int = Path(..., title='Id партнерской компетенции'),
+        activity_sphere_id: int = Path(..., title='Id партнерской компетенции'),
         session=Depends(deps.get_db)
 ):
-    obj = crud_activity_sphere.get(db=session, id=activity_spheres_id)
+    obj = crud_activity_sphere.get(db=session, id=activity_sphere_id)
     if obj is None:
         raise UnprocessableEntity(
             message="Такой сфера деятельности нет!",
@@ -148,17 +149,17 @@ def update_upload_file(
 
 
 # DELETE
-@router.delete('/activity-spheres/{activity_spheres_id}/',
+@router.delete('/activity-spheres/{activity_sphere_id}/',
                response_model=SingleEntityResponse,
                name='Удалить сферу деятельности',
                description='Полностью удаляет сферу деятельности',
                tags=['Админ панель / Сферы деятельности'])
 def delete_partner_competences(
         request: Request,
-        activity_spheres_id: int = Path(..., title='Id сферы деятельности'),
+        activity_sphere_id: int = Path(..., title='Id сферы деятельности'),
         session=Depends(deps.get_db)
 ):
-    if crud_activity_sphere.get(db=session, id=activity_spheres_id) is None:
+    if crud_activity_sphere.get(db=session, id=activity_sphere_id) is None:
         raise UnfoundEntity(
             message="Сферы деятельности с таким id нет!",
             num=1,
@@ -166,7 +167,7 @@ def delete_partner_competences(
             path="$.body"
         )
     return SingleEntityResponse(data=get_activity_sphere(
-        db_obj=(crud_activity_sphere.remove(db=session, id=activity_spheres_id)), request=request))
+        db_obj=(crud_activity_sphere.remove(db=session, id=activity_sphere_id)), request=request))
 
 
 if __name__ == "__main":

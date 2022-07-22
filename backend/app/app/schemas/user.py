@@ -42,7 +42,6 @@ class UserGet(BaseModel):
     telegram: Optional[str]
 
 
-
 class UserCreate(BaseModel):
     tel: str
 

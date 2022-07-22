@@ -94,7 +94,15 @@ class ModeratorEntrance(BaseModel):
     password: str
 
 
-# class ModeratorEntranceKeySalt(BaseModel):
-#     login: str
-#     key: str
-#     salt: str
+class ModeratorGetDelete(BaseModel):
+    id: int
+    login: str
+    tel: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    birthday: Optional[int]
+    location: Optional[int]
+    photo: Optional[str]
+    area_of_responsibility: Optional[int]  # C
+    average_first_response_time: Optional[int]  # или формат должен быть временной
+    is_superuser: Optional[bool]
