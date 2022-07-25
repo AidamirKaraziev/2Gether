@@ -185,7 +185,6 @@ def check_code(
             description="Попробуйте запросить новый код!",
             path="$.body"
             )
-
     used = UsedVerifCode(actual=False)
     service.update_actual(db=session, db_obj=data, obj_in=used)
 

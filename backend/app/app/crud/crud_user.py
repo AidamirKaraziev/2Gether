@@ -78,14 +78,22 @@ class CrudUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter(User.tel == tel).first()
 
     def adding_photo(self, db: Session, num, id_user: int, file: Optional[UploadFile]):
-
+        path_name = DATA_FOLDER + f"{id_user}/{num}/"
         if file is None:
+            # Удаляем все содержимое папки
+            path_to_clear = path_name + "*"
+            for file_to_clear in glob.glob(path_to_clear):
+                os.remove(file_to_clear)
             db.query(User).filter(User.id == id_user).update({f'photo_{num}': None})
             db.commit()
-            return {"photo": None}
+            return {f"photo_{num}": None}
+        # if file is None:
+        #     db.query(User).filter(User.id == id_user).update({f'photo_{num}': None})
+        #     db.commit()
+        #     return {"photo": None}
 
         filename = uuid.uuid4().hex + os.path.splitext(file.filename)[1]
-        path_name = DATA_FOLDER + f"{id_user}/{num}/"
+        # path_name = DATA_FOLDER + f"{id_user}/{num}/"
         element = ["Photo_users", str(id_user), num, filename]
 
         path_for_db = "/".join(element)

@@ -59,10 +59,17 @@ class CrudModerator(CRUDBase[Moderator, ModeratorCreate, ModeratorUpdate]):
         return db.query(Moderator).filter(Moderator.id == id).first()
 
     def adding_photo(self, db: Session, id_moderator: int, file: Optional[UploadFile]):
-        if file is None:
-            return None
-        filename = uuid.uuid4().hex + os.path.splitext(file.filename)[1]
         path_name = FOLDER_MODERATOR_PHOTO + f"{id_moderator}/"
+        if file is None:
+            # Удаляем все содержимое папки
+            path_to_clear = path_name + "*"
+            for file_to_clear in glob.glob(path_to_clear):
+                os.remove(file_to_clear)
+            db.query(Moderator).filter(Moderator.id == id_moderator).update({f'photo': None})
+            db.commit()
+            return {"photo": None}
+        filename = uuid.uuid4().hex + os.path.splitext(file.filename)[1]
+        # path_name = FOLDER_MODERATOR_PHOTO + f"{id_moderator}/"
         element = ["Moderator_photo", str(id_moderator), filename]
 
         path_for_db = "/".join(element)
@@ -88,6 +95,17 @@ class CrudModerator(CRUDBase[Moderator, ModeratorCreate, ModeratorUpdate]):
                                 path="$.body", )
         else:
             return {"photo": path_for_db}
+
+    # Проверяет, является ли superuser
+    def check_is_superuser(self, db: Session, *, current_moderator: Moderator):
+        db_obj = crud_moderator.get(db=db, id=current_moderator.id)
+        # Проверить есть ли такой модератор
+        if db_obj is None:
+            return None, -1, None
+        # Проверить является ли is_superuser
+        if current_moderator.is_superuser is False:
+            return None, -2, None
+        return db_obj, 0, None
 
     def update_moderator_self(self, db: Session, *, current_moderator: Moderator,
                               obj_in: Union[ModeratorRequest, Dict[str, Any]]) -> Moderator:
@@ -137,7 +155,7 @@ class CrudModerator(CRUDBase[Moderator, ModeratorCreate, ModeratorUpdate]):
         return db_obj, 0, None
 
     def update_moderator(self, db: Session, *, moderator_id: int, current_moderator: Moderator,
-                              obj_in: Union[ModeratorRequest, Dict[str, Any]]) -> Moderator:
+                         obj_in: Union[ModeratorRequest, Dict[str, Any]]) -> Moderator:
         # Проверить является ли is_superuser
         if not current_moderator.is_superuser:
             return None, -1, None
@@ -154,7 +172,8 @@ class CrudModerator(CRUDBase[Moderator, ModeratorCreate, ModeratorUpdate]):
                 return None, -3, None
         # Check responsibility areas
         if in_ob['area_of_responsibility_id'] is not None:
-            if not (db.query(AreaOfResponsibility).filter(AreaOfResponsibility.id == in_ob['area_of_responsibility_id']).first()):
+            if not (db.query(AreaOfResponsibility).filter(
+                    AreaOfResponsibility.id == in_ob['area_of_responsibility_id']).first()):
                 return None, -4, None
         if in_ob['password'] is not None:
             psw = get_password_hash(password=in_ob["password"])
@@ -176,32 +195,3 @@ class CrudModerator(CRUDBase[Moderator, ModeratorCreate, ModeratorUpdate]):
 
 
 crud_moderator = CrudModerator(Moderator)
-
-#
-# def update_moderator(self, db: Session, *, moderator: Optional[ModeratorRequest],
-#                      moderator_id: int, current_moderator: Moderator):
-#     # Проверить является ли is_superuser
-#     if not current_moderator.is_superuser:
-#         return None, -1, None
-#     this_moderator = db.query(Moderator).filter(Moderator.id == moderator_id).first()
-#     # проверяем есть ли такой модератор
-#     if this_moderator is None:
-#         return None, -2, None
-#
-#     # Check location
-#     if moderator.location_id in moderator:
-#
-#         if not (db.query(Location).filter(Location.id == moderator.location_id).first()):
-#             return None, -3, None
-#     # Check responsibility areas
-#     if moderator.area_of_responsibility_id in moderator:
-#         if not db.query(AreaOfResponsibility).filter(
-#                 AreaOfResponsibility.id == moderator.area_of_responsibility_id).first():
-#             return None, -4, None
-#     if moderator.password is not None:
-#         psw = get_password_hash(password=moderator.password)
-#         moderator.password = psw
-#     if moderator.birthday is not None:
-#         moderator.birthday = date_from_timestamp(moderator.birthday)
-#     moderator = super().update(db=db, db_obj=this_moderator, obj_in=moderator)
-#     return moderator, 0, None

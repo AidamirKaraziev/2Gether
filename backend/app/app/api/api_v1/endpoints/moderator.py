@@ -50,7 +50,7 @@ def entrance(
 
 
 # CREATE
-@router.post('/cp/moderators/me/',
+@router.post('/cp/moderators/',
              response_model=SingleEntityResponse[ModeratorGet],
              name='Создать модератора',
              description='Создать модератора, ',
@@ -112,7 +112,7 @@ def create_moderator(
 
 
 # Апи удаления модератора АДМИНОМ
-@router.delete("/cp/moderators/me/{moderator_id}/",
+@router.delete("/cp/moderators/{moderator_id}/",
                response_model=SingleEntityResponse,
                name='Удаление модератора',
                description='Модератора удаляет админ',
@@ -173,6 +173,7 @@ def remove_with_path(
         crud_moderator.remove(db=session, id=current_moderator.id), request=request))
 
 
+# UPDATE PHOTO BY TOKEN
 @router.put("/cp/moderators/me/photos/",
             response_model=SingleEntityResponse[ModeratorGet],
             name='Изменить фотографию',
@@ -194,6 +195,55 @@ def create_upload_file(
                             path="$.body",
                             )
     return SingleEntityResponse(data=get_moderator(current_moderator, request=request))
+
+
+# UPDATE PHOTO FOR ADMIN
+@router.put("/cp/moderators/{moderator_id}/photos/",
+            response_model=SingleEntityResponse[ModeratorGet],
+            name='Изменить фотографию модератора',
+            description='Изменить фотографию модератора, Админом. Если отправить пустой файл сбрасывает фото в профиле',
+            tags=['Админ панель / Модератор'],
+            )
+def create_upload_file(
+        request: Request,
+        moderator_id: int = Path(..., title='Id проекта'),
+        file: Optional[UploadFile] = File(None),
+        current_moderator=Depends(deps.get_current_moderator_by_bearer),
+        session=Depends(deps.get_db),
+        ):
+    # Надо будет проверить является ли он супер пупер админом
+    db_obj, code, index = crud_moderator.check_is_superuser(db=session, current_moderator=current_moderator)
+    if code == -1:
+        raise UnfoundEntity(
+            message="Администратора не существует",
+            num=1,
+            description="Нет id модератора в базе данных",
+            path="$.body"
+        )
+    if code == -2:
+        raise InaccessibleEntity(
+            message="Нет доступа к изменению!",
+            num=2,
+            description="Менять модераторов могут только администраторы",
+            path="$.body"
+        )
+    if db_obj:
+        if crud_moderator.get(db=session, id=moderator_id) is None:
+            raise UnfoundEntity(
+                message="Модератора не существует",
+                num=3,
+                description="Нет id модератора в базе данных",
+                path="$.body"
+            )
+        save_path = crud_moderator.adding_photo(db=session, file=file, id_moderator=moderator_id)
+        if not save_path:
+            raise UnfoundEntity(message="Не отправлен загружаемый файл",
+                                num=4,
+                                description="Попробуйте загрузить файл еще раз",
+                                path="$.body",
+                                )
+    mod = crud_moderator.get(db=session, id=moderator_id)
+    return SingleEntityResponse(data=get_moderator(mod, request=request))
 
 
 # GET ALL MODERATOR
@@ -237,7 +287,7 @@ def get_data(
     return SingleEntityResponse(data=get_moderator(moderator=moderator, request=request))
 
 
-# UPDATE MODERATOR
+# UPDATE MODERATOR FOR ADMIN
 @router.put('/cp/moderators/{moderator_id}/',
             response_model=SingleEntityResponse[ModeratorGet],
             name='Изменить данные модератора',
@@ -301,7 +351,8 @@ def update_moderator(
         session=Depends(deps.get_db),
 ):
 
-    db_obj, code, index = crud_moderator.update_moderator_self(db=session, current_moderator=current_moderator, obj_in=new_data)
+    db_obj, code, index = crud_moderator.update_moderator_self(
+        db=session, current_moderator=current_moderator, obj_in=new_data)
     if code == -1:
         raise UnfoundEntity(
             message="Модератора с таким id не существует!",

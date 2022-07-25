@@ -83,8 +83,7 @@ def check_code(
                              x_firebase_token=x_firebase_token)
 
     used = UsedVerifCode(actual=False)
-    service.update(db=session, db_obj=data, obj_in=used)
-
+    service.update_actual(db=session, db_obj=data, obj_in=used)
     # Заменить снизу на генерацию и отправку токена
     token = create_token(subject=user.id)
     return SingleEntityResponse(data=TokenBase(token=token))
